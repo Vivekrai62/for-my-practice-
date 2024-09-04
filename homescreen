@@ -1,0 +1,303 @@
+	
+class HomeScreen extends StatefulWidget {
+  final String? token;
+  final bool? isOwner;
+  final int? initialTabIndex;
+
+  HomeScreen({required this.token, this.isOwner, Key? key, this.initialTabIndex}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  AboutCompanyViewModel model = AboutCompanyViewModel();
+  LoginViewModel loginModel = LoginViewModel();
+  GuestDbCountViewModel dbCount = GuestDbCountViewModel();
+  NotificationServices notificationServices = NotificationServices();
+  DbCountViewModel count = DbCountViewModel();
+  List<AboutCompany> about = [];
+  int _selectedIndex = 0;
+
+  final List<String> _labels = [
+    'Home',
+    'Customers',
+    'Cart',
+    'Profile',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialTabIndex ?? 0;
+    notificationServices.requestNotificationPermission(widget.isOwner, widget.token);
+    notificationServices.foregroundMessage();
+    notificationServices.firebaseInit(context, widget.isOwner, widget.token);
+    notificationServices.setupInteractMessage(context, widget.isOwner, widget.token);
+    notificationServices.isTokenRefresh();
+    getCount();
+    getData();
+  }
+
+  Future<void> getCount() async {
+    if (widget.token != null && widget.token!.isNotEmpty) {
+      await count.fetchCountApi(context);
+      getData();
+    } else {
+      await dbCount.fetchDbCountApi();
+    }
+  }
+
+  Future<void> getData() async {
+    await model.fetchAboutCompany();
+  }
+
+  Future<bool?> _onWillPop() async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Do you want to exit the App?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => exit(0),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIcon(int index) {
+    final cart = Provider.of<Cart>(context, listen: false);
+    switch (index) {
+      case 0:
+        return Image.asset(
+          _selectedIndex == index ? 'assets/images/png/home.png' : 'assets/images/png/home_outlined.png',
+          width: 5.w,
+        );
+      case 1:
+        return Image.asset(
+          _selectedIndex == index ? 'assets/images/png/customers.png' : 'assets/images/png/customers_outlined.png',
+          width: 6.w,
+        );
+      case 2:
+        return FutureBuilder(
+          future: cart.loadCart(),
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            return Consumer<Cart>(builder: (BuildContext context, value, Widget? child) {
+              return Badge(
+                label: Text(
+                  value.items.length.toString(),
+                  style: TextStyle(fontSize: 12),
+                ),
+                isLabelVisible: true,
+                backgroundColor: AppColors.badgeColor,
+                alignment: Alignment.topRight,
+                child: Image.asset(
+                  _selectedIndex == index ? 'assets/images/png/cart_filled.png' : 'assets/images/png/cart_outlined.png',
+                  width: 6.w,
+                ),
+              );
+            });
+          },
+        );
+      case 3:
+        return Image.asset(
+          _selectedIndex == index ? 'assets/images/png/profile.png' : 'assets/images/png/profile_outlined.png',
+          width: 6.w,
+        );
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0:
+        return DashboardScreen(isOwner: widget.isOwner, token: widget.token, aboutCompany: about);
+      case 1:
+        return widget.token != null && widget.token!.isNotEmpty ? const CustomersScreen() : LoginScreen();
+      case 2:
+        return widget.token != null && widget.token!.isNotEmpty ? CartScreen(owner: widget.token, isOwner: widget.isOwner) : LoginScreen();
+      case 3:
+        return widget.token != null && widget.token!.isNotEmpty ? ProfileScreen(value: about, isOwner: widget.isOwner) : LoginScreen();
+      default:
+        return Container();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        bool? result = await _onWillPop();
+        result ??= false;
+        return result;
+      },
+      child: ChangeNotifierProvider<AboutCompanyViewModel>(
+        create: (BuildContext context) => model,
+        child: Consumer<AboutCompanyViewModel>(builder: (context, value, _) {
+          switch (value.aboutCompany.status!) {
+            case Status.loading:
+              return Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: AppColors.backgroundColor,
+                child: Center(
+                  child: LoadingAnimationWidget.discreteCircle(
+                    color: AppColors.primaryColor,
+                    size: 40,
+                  ),
+                ),
+              );
+            case Status.error:
+              return ErrorDialogue(
+                message: value.aboutCompany.message,
+              );
+            case Status.completed:
+              about.add(value.aboutCompany.data!.data!);
+
+              return Scaffold(
+                body: Row(
+
+
+                  children: [
+                    if (isTablet(context))
+                      NavigationRail(
+                        backgroundColor: AppColors.backgroundColor,
+                        selectedIndex: _selectedIndex == 3 ? 0 : _selectedIndex, // Set to a valid index if Profile is selected
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        labelType: NavigationRailLabelType.all,
+                        selectedLabelTextStyle: TextStyle(
+                          color: AppColors.primaryColor,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        unselectedLabelTextStyle: TextStyle(
+                          color: Colors.black.withOpacity(0.6),
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        destinations: [
+                          NavigationRailDestination(
+                            icon: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below 'Home'
+                              child: _buildIcon(0),
+                            ),
+                            label: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below the label
+                              child: Text(_labels[0]),
+                            ),
+                          ),
+                          NavigationRailDestination(
+                            icon: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below 'Customers'
+                              child: _buildIcon(1),
+                            ),
+                            label: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below the label
+                              child: Text(_labels[1]),
+                            ),
+                          ),
+                          NavigationRailDestination(
+                            icon: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below 'Cart'
+                              child: _buildIcon(2),
+                            ),
+                            label: Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0), // Add space below the label
+                              child: Text(_labels[2]),
+                            ),
+                          ),
+                        ],
+                        trailing: Expanded(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedIndex = 3; // Set index for Profile
+                                  });
+                                },
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildIcon(3),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      _labels[3],
+                                      style: TextStyle(
+                                        color: _selectedIndex == 3 ? AppColors.primaryColor : Colors.black.withOpacity(0.6),
+                                        fontSize: 14.5,
+                                        fontWeight: _selectedIndex == 3 ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+
+                    if (isTablet(context))
+                      const VerticalDivider(thickness: 1, width: 1),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Expanded(
+                            child: Center(child: _buildScreen(_selectedIndex)),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                bottomNavigationBar: !isTablet(context) && widget.token != null && widget.token!.isNotEmpty
+                    ? BottomNavigationBar(
+                  backgroundColor: Colors.white,
+                  type: BottomNavigationBarType.fixed,
+                  selectedLabelStyle: TextStyle(fontSize: 14),
+                  selectedItemColor: AppColors.primaryColor,
+                  unselectedItemColor: Colors.grey,
+                  currentIndex: _selectedIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  items: [
+                    for (int index = 0; index < 4; index++)
+                      BottomNavigationBarItem(
+                        icon: _buildIcon(index),
+                        label: _labels[index],
+                      ),
+                  ],
+                )
+                    : null,
+              );
+          }
+        }),
+      ),
+    );
+  }
+
+  bool isTablet(BuildContext context) {
+    final data = MediaQuery.of(context);
+    return data.size.shortestSide >= 600;
+  }
+}
