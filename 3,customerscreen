@@ -1,0 +1,234 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:pharma_clients_app/data/model/response_model/customers/customers_responseModel.dart';
+import 'package:pharma_clients_app/view_model/afterLogin_viewModel/afterLogin_viewModels.dart';
+import 'package:provider/provider.dart';
+import '../../data/response/status.dart';
+import '../../resources/app_colors.dart';
+import '../../resources/constant_imageString.dart';
+import '../../resources/constant_strings.dart';
+import '../../utils/Dialogue/error_dialogue.dart';
+import '../../utils/Responsive/ResponsiveUtils.dart';
+import '../../utils/text_style.dart';
+import 'add_customer.dart';
+import 'customers_profileScreen.dart';
+
+class CustomersScreen extends StatefulWidget {
+  const CustomersScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CustomersScreen> createState() => _CustomersScreenState();
+}
+
+class _CustomersScreenState extends State<CustomersScreen> {
+  CustomersViewModel model = CustomersViewModel();
+  Customers? selectedCustomer;
+
+  @override
+  void initState() {
+    model.fetchCustomers();
+    super.initState();
+  }
+
+  void _showCustomerDetail(Customers customerDetail) {
+    setState(() {
+      selectedCustomer = customerDetail;
+    });
+  }
+
+  void _hideCustomerDetail() {
+    setState(() {
+      selectedCustomer = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    double responsivePadding = screenWidth * 0.02; // 2% of screen width
+    double responsiveMargin = screenWidth * 0.02; // 2% of screen width
+
+    double iconSize = Responsive.isTablet(context)
+        ? screenWidth * 0.034
+        : screenWidth * 0.06;
+
+    double containerHeight = screenHeight * 0.18; // 18% of screen height
+
+    rowWidget(String message, IconData icon) {
+      return Row(
+        children: [
+          Icon(icon, size: iconSize, color: AppColors.primaryColor),
+          SizedBox(width: responsivePadding),
+          Expanded(child: TextWithStyle.customerDetails(context, message)),
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        elevation: 0,
+        title: TextWithStyle.appBarTitle(context, ConstantStrings.customerHeading),
+      ),
+      body: Stack(
+        children: [
+          // Customer List
+          if (selectedCustomer == null)
+            ChangeNotifierProvider<CustomersViewModel>(
+              create: (BuildContext context) => model,
+              child: Consumer<CustomersViewModel>(
+                builder: (context, value, _) {
+                  switch (value.customersList.status!) {
+                    case Status.loading:
+                      return const Center(child: CircularProgressIndicator());
+                    case Status.error:
+                      return ErrorDialogue(message: value.customersList.message.toString());
+                    case Status.completed:
+                      return value.customersList.data!.data!.isNotEmpty
+                          ? ListView.builder(
+                        itemCount: value.customersList.data!.data!.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: responsiveMargin, vertical: responsiveMargin),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(responsivePadding),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryColor.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                _showCustomerDetail(value.customersList.data!.data![index]);
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(responsivePadding),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: TextWithStyle.customerName(
+                                            context,
+                                            value.customersList.data!.data![index].name,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: responsivePadding,
+                                              vertical: responsivePadding / 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryColor,
+                                            borderRadius: BorderRadius.circular(
+                                                responsivePadding),
+                                          ),
+                                          child: TextWithStyle.customerStatus(
+                                            context,
+                                            value.customersList.data!.data![index]
+                                                .profession,
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: responsiveMargin),
+                                    rowWidget(
+                                      '${value.customersList.data!.data![index].email}',
+                                      CupertinoIcons.mail_solid,
+                                    ),
+                                    SizedBox(height: responsiveMargin),
+                                    rowWidget(
+                                      '${value.customersList.data!.data![index].phone}',
+                                      CupertinoIcons.phone_fill,
+                                    ),
+                                    SizedBox(height: responsiveMargin),
+                                    rowWidget(
+                                      '${value.customersList.data!.data![index].address}',
+                                      CupertinoIcons.location_solid,
+                                    ),
+                                    Divider(thickness: 1, endIndent: responsiveMargin),
+                                    TextWithStyle.customerTimeDetails(
+                                      context,
+                                      "${value.customersList.data!.data![index].createdOn}",
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                          : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              ConstantImage.empty,
+                              width: screenWidth * 0.7,
+                              fit: BoxFit.fill,
+                            ),
+                            SizedBox(height: responsiveMargin),
+                            TextWithStyle.appBarTitle(
+                                context, ConstantStrings.emptyScreen),
+                          ],
+                        ),
+                      );
+                  }
+                },
+              ),
+            ),
+          // Customer Detail View
+          if (selectedCustomer != null)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: CustomersProfileScreen(
+                key: ValueKey(selectedCustomer), // Ensures proper animation
+                profile: [selectedCustomer!],
+              ),
+            ),
+          // Back Button
+          if (selectedCustomer != null)
+            Positioned(
+              top: 10,
+              left: 10,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: _hideCustomerDetail,
+              ),
+            ),
+        ],
+      ),
+      floatingActionButton: SizedBox(
+        height: 56,
+        width: 56,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddCustomerScreen()),
+            );
+          },
+          backgroundColor: AppColors.primaryColor,
+          child: Icon(
+            CupertinoIcons.person_add,
+            color: Colors.white,
+            size: iconSize,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+        ),
+      ),
+    );
+  }
+}
