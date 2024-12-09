@@ -1,0 +1,134 @@
+
+
+
+
+👍👍LEAD SCREEN👍👍
+
+- **Lead List:**
+  - Checkbox selected for leads: Action to be performed. API implementation required.
+  - Lead List (Detail Screen): API implementation required.
+  - Tap icon (Lead Detail View): UI with Lead Patch (Update) functionality required.
+
+- **Trash Screen:**
+  - Checkbox clicked for restoring or deleting leads: API implementation required.
+
+- **Setting Screen:**
+  - List is shown in column setting, but checkbox actions, update, and save changes are not working. Same issue with field settings.
+
+- **Lead Master:**
+  - Types, Source, and Dead Reason: Patch API not implemented on the edit icon.
+
+---
+
+👍👍CUSTOMER SCREEN👍👍
+
+- **List:**
+  - After clicking, checkbox actions show, but API and UI are not implemented because it is a new functionality.
+  - Clicking on a customer’s details: Not working.
+  - Customer Detail View (Eye icon): 30% functionality not working.
+  - Patch API not implemented on the edit icon.
+
+- **Activities:**
+  - Clicking on a customer name (Customer Detail API/UI not implemented).
+  - After clicking, the view does not work.
+
+- **Daily Sales Report:**
+  - Clicking on the price in the Daily Sales Report list does not work.
+
+- **No Activities:**
+  - Checkbox (Assigned To - Add to Campaign): Functionality not working because it is a new feature.
+  - Clicking on any list detail does not show or work.
+
+- **Customer Report:**
+  - Clicking on any list details does not work.
+
+- **Status Report:**
+  - Details view incomplete (UI and API).
+
+- **Service Status:**
+  - Incomplete because it is a new screen.
+
+- **Payment Reminder:**
+  - All functionalities are complete, except for the payment details view.
+
+- **Companies:**
+  - All functionalities are complete (list showing), except for company details view and company website opening.
+
+- **Services:**
+  - Detail view clicked on company name: Not working.
+
+- **Order Product List:**
+  - One issue is incomplete: Force quit and re-run.
+
+- **Orderless Services:**
+  - List was showing before 10 days, but it is currently not showing due to a backend issue.
+
+- **Trash:**
+  - List is showing, but after clicking on the checkbox to restore a customer, it does not work because the API is not implemented.
+
+- **Activation List:**
+  - View not working because the API is not implemented.
+
+- **Customer Master:**
+  - Patch (update/edit), add/update/create API not implemented on any screen.
+
+- **Setting:**
+  - API not implemented for checkbox actions, and Save Changes API not implemented.
+
+
+👍👍ORDER SCREEN👍👍
+
+- **List:**
+  - List is showing, but delete, sync, and customer name details are not working because the API is not implemented.
+
+- **Activity:**
+  - Filter for User with Team not working.
+
+- **Performa:**
+  - List was showing but is currently not displaying. View Performa not working.
+  - Type and customer details not showing.
+
+- **Payment:**
+  - Edit icon not working because the API is not implemented.
+
+- **Order Master:**
+  - Add new status and edit icon: API not implemented.
+
+
+
+  👍👍REPORTS👍👍
+
+- **Task Report:**
+  - Ongoing Task: Clicking on the task opens a new screen, but some APIs are not implemented for description creation, remarks, history, and attachments.
+
+
+
+👍👍SALES👍👍
+
+- **Sales Screen:**
+  - After clicking on December, the API and UI are not implemented.
+
+
+
+ 👍👍ROLES👍👍
+
+ **100% Complete**
+
+
+
+ 👍👍MASTER👍👍
+
+- All lists are available, but no Patch, Delete, Update, or Create APIs are implemented.
+
+- **Departments:**
+  - API not implemented for adding departments and updating/editing.
+
+- **Divisions:**
+  - API not implemented for adding divisions and updating/editing.
+
+- **Proposal:**
+  - API not implemented for adding lead proposals and updating/editing.
+
+- **Customize Label:**
+  - API not implemented for editing (icon) updates
+
