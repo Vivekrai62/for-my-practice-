@@ -1,4 +1,4 @@
-👍👍LEAD SCREEN👍👍
+👍👍LEAD SCREEN👍👍  🖥 
 
 - **Lead List:**
   - Checkbox selected for leads: Action to be performed. API implementation required.
@@ -16,7 +16,7 @@
 
 ---
 
-👍👍CUSTOMER SCREEN👍👍
+👍👍CUSTOMER SCREEN👍👍🖥 
 
 - **List:**
   - After clicking, checkbox actions show, but API and UI are not implemented because it is a new functionality.
@@ -72,7 +72,7 @@
   - API not implemented for checkbox actions, and Save Changes API not implemented.
 
 
-👍👍ORDER SCREEN👍👍
+👍👍ORDER SCREEN👍👍 🖥 
 
 - **List:**
   - List is showing, but delete, sync, and customer name details are not working because the API is not implemented.
@@ -92,27 +92,36 @@
 
 
 
-  👍👍REPORTS👍👍
+  👍👍REPORTS👍👍  🖥 
 
 - **Task Report:**
   - Ongoing Task: Clicking on the task opens a new screen, but some APIs are not implemented for description creation, remarks, history, and attachments.
 
 
 
-👍👍SALES👍👍
+👍👍SALES👍👍  🖥 
 
 - **Sales Screen:**
   - After clicking on December, the API and UI are not implemented.
 
 
 
- 👍👍ROLES👍👍
+ 👍👍ROLES👍👍 🖥 
 
  **100% Complete**
 
 
+ 👍👍Project👍👍 
+    Project List:- 
+      Details view:-
+         Credentials:-  Pending by backend side response not coming
+   
+ 
 
- 👍👍MASTER👍👍
+
+
+
+ 👍👍MASTER👍👍 🖥 
 
 - All lists are available, but no Patch, Delete, Update, or Create APIs are implemented.
 
