@@ -1,0 +1,1132 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:websuites/views/leadScreens/createNewLead/widgets/createNewLeadCard/create_new_lead_card.dart';
+import '../../../data/models/responseModels/projects/list/details/ProjectDetailsResponseModels.dart';
+import '../../../resources/strings/strings.dart';
+import '../../../utils/components/buttons/common_button2.dart';
+import '../../../utils/fontfamily/FontFamily.dart';
+import '../../../utils/appColors/app_colors.dart';
+import '../../../utils/datetrim/DateTrim.dart';
+import '../../../viewModels/leadScreens/createNewLead/assignedLeadTo/assigned_lead_to_viewModel.dart';
+import '../../../viewModels/projects/details/ProjectDetailsViewModels.dart';
+
+class ProjectDetailsController extends GetxController {
+  final RxList<Map<String, dynamic>> addedRows = <Map<String, dynamic>>[].obs;
+  final RxBool loading = true.obs; // Start with loading as true
+
+  final List<String> months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  final AssignedLeadToViewModel _assignedLeadToController =
+  Get.put(AssignedLeadToViewModel());
+  final ProjectDetailViewModel _viewModel = Get.find<ProjectDetailViewModel>();
+  String projectId;
+
+  ProjectDetailsController(this.projectId);
+
+  void _initControllers(BuildContext context) {
+    _assignedLeadToController
+        .fetchAssignedLeads(context); // Ensure this is called
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initControllers(Get.context!); // Pass the context here
+    fetchProjectDetails();
+    addedRows.add({'month': null, 'day': null});
+  }
+
+  Future<void> fetchProjectDetails() async {
+    try {
+      loading.value = true; // Set loading to true while fetching
+      await _viewModel.projectDetailView(Get.context!, projectId);
+    } finally {
+      loading.value = false; // Set loading to false after fetching data
+    }
+  }
+
+  // Method to refresh project details
+  Future<void> refreshList(BuildContext context) async {
+    await fetchProjectDetails(); // Re-fetch the project details
+  }
+
+  void addNewRow() {
+    if (addedRows.length < 3) {
+      addedRows.add({'month': null, 'day': null});
+    }
+  }
+
+  void removeRow(int index) {
+    addedRows.removeAt(index);
+  }
+
+  void updateMonth(int index, String month) {
+    addedRows[index]['month'] = month;
+    addedRows.refresh();
+  }
+
+  void updateDay(int index, String day) {
+    addedRows[index]['day'] = day;
+    addedRows.refresh();
+  }
+
+  bool get canAddMore => addedRows.length < 3;
+
+  // Getter for projectDetail
+  ProjectDetailResponseModel? get projectDetail => _viewModel.projectDetail.value;
+}
+
+class ProjectDetailsScreen extends GetView<ProjectDetailsController> {
+  final selectedTab = 'Overview'.obs;
+  final String projectId;
+  final AssignedLeadToViewModel _assignedLeadToController =
+  Get.put(AssignedLeadToViewModel());
+
+  ProjectDetailsScreen({Key? key, required this.projectId}) : super(key: key) {
+    // Register the ProjectDetailViewModel
+    Get.put(ProjectDetailViewModel());
+    Get.put(ProjectDetailsController(projectId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        surfaceTintColor: Colors.white,
+        title: const Text("Project Details"),
+      ),
+      body: Obx(() {
+        // Accessing loading state from the controller
+        if (controller.loading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        // Check if project detail is null
+        if (controller.projectDetail == null) {
+          return const Center(child: Text("No project details found"));
+        }
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.refreshList(Get.context!);
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Overview Tab
+                      Expanded(
+                        child: Obx(() => GestureDetector(
+                          onTap: () => selectedTab.value = 'Overview',
+                          child: Container(
+                            height : Get.height / 30,
+                            decoration: BoxDecoration(
+                              color: selectedTab.value == 'Overview'
+                                  ? AllColors.mediumPurple
+                                  : AllColors.textField2,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Overview',
+                                style: TextStyle(
+                                  color: selectedTab.value == 'Overview'
+                                      ? AllColors.whiteColor
+                                      : AllColors.blackColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )),
+                      ),
+                      const SizedBox(width: 8),
+                      // Task Tab
+                      Expanded(
+                        child: Obx(() => GestureDetector(
+                          onTap: () => selectedTab.value = 'Task',
+                          child: Container(
+                            height: Get.height / 30,
+                            decoration: BoxDecoration(
+                              color: selectedTab.value == 'Task'
+                                  ? AllColors.mediumPurple
+                                  : AllColors.textField2,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Task',
+                                style: TextStyle(
+                                  color: selectedTab.value == 'Task'
+                                      ? AllColors.whiteColor
+                                      : AllColors.blackColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )),
+                      ),
+                      const SizedBox(width: 8),
+                      // Sequential Task Tab
+                      Expanded(
+                        child: Obx(() => GestureDetector(
+                          onTap: () => selectedTab.value = 'SequentialTask',
+                          child: Container(
+                            height: Get.height / 30,
+                            decoration: BoxDecoration(
+                              color: selectedTab.value == 'SequentialTask'
+                                  ? AllColors.mediumPurple
+                                  : AllColors.textField2,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'SequentialTask',
+                                style: TextStyle(
+                                  color: selectedTab.value == 'SequentialTask'
+                                      ? AllColors.whiteColor
+                                      : AllColors.blackColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Obx(() {
+                    final projectDetail = controller.projectDetail;
+                    switch (selectedTab.value) {
+                      case 'Overview':
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 0, right: 0, top: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      top: 10, left: 10, right: 10, bottom: 30),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        blurRadius: 8.0,
+                                        spreadRadius: 2.0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              Get.back();
+                                            },
+                                            child: const Icon(
+                                              Icons.arrow_back_outlined,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Flexible(
+                                            flex: 9,
+                                            child: Text(
+                                              '${projectDetail?.project?.projectName ?? 'No project data'}',
+                                              style: const TextStyle(
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Color(0x1F47BD82),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: const Text(
+                                              'Activation Sent',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF47BD82),
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          const Icon(
+                                            Icons.mode_edit_outline_outlined,
+                                            size: 16,
+                                          ),
+                                        ],
+                                      ),
+                                      const Divider(thickness: 0.5),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Project Overview',
+                                            style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: FontFamily.sfPro),
+                                          ),
+                                          const Spacer(),
+                                          ElevatedButton(
+                                            onPressed: () {},
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AllColors.darkOrange,
+                                              minimumSize: const Size(0, 20),
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 18, vertical: 4),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(19),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '${projectDetail?.project?.status}',
+                                              style: TextStyle(
+                                                color: AllColors.whiteColor,
+                                                fontSize: 12,
+                                                fontFamily: FontFamily.sfPro,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                'Billing Type - ',
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontFamily: FontFamily.sfPro,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                              Flexible(
+                                                child: Text(
+                                                  '${projectDetail?.project?.billingType}',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: const TextStyle(fontSize: 12),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8), // Add spacing between rows
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Customer - ',
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontFamily: FontFamily.sfPro,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                              Flexible(
+                                                child: Text(
+                                                  '${projectDetail?.project?.customer?.firstName ?? ''} '
+                                                      '${projectDetail?.project?.customer?.lastName ?? ''}',
+                                                  style: const TextStyle(fontSize: 12),
+                                                  overflow: TextOverflow.visible,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Created - ',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontFamily: FontFamily.sfPro,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          Text(formatShortDate(projectDetail?.project?.createdAt.toString())),
+                                          const Spacer(),
+                                          const Text(
+                                            'Start Date - ',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontFamily: FontFamily.sfPro,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          Text(formatShortDate(projectDetail?.project?.startDate.toString())),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Deadline - ',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontFamily: FontFamily.sfPro,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          Text(formatShortDate('${projectDetail?.project?.deadline ?? 'N/A'}')),
+                                          const Spacer(),
+                                          const Text(
+                                            'Total Estimated Hours - ',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontFamily: FontFamily.sfPro,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          Text('${projectDetail?.project?.estimatedHours ?? 'N/A'}')
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Company Phone - ',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12),
+                                          ),
+                                          Text('${projectDetail?.project?.company?.companyPhone ?? 'N/A'}'),
+                                          const Spacer(),
+                                          const Text(
+                                            'Tags - ',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {},
+                                            child: Container(
+                                              alignment: Alignment.center,
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 7, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: AllColors.thinOrange,
+                                                borderRadius: BorderRadius.circular(19),
+                                              ),
+                                              child: Text(
+                                                (projectDetail?.project?.tags != null && projectDetail!.project!.tags.isNotEmpty)
+                                                    ? projectDetail!.project!.tags.map((tag) => tag.name).join(', ')
+                                                    : 'N/A',
+                                                style: TextStyle(
+                                                  color: AllColors.darkYellow,
+                                                  fontSize: 12,
+                                                  fontFamily: FontFamily.sfPro,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Company Name - ',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text('${projectDetail?.project?.company?.companyName ?? 'N/A'}'),
+                                        ],
+                                      ),
+                                      Text(
+                                        '${projectDetail?.project?.company?.companyEmail ?? 'N/A'}',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Contact Person Name - ',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${projectDetail?.project?.company?.contactPersonName ?? 'N/A'}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: FontFamily.sfPro,
+                                              color: AllColors.mediumPurple,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                ' Total Rate - ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              Text(
+                                                ' ${projectDetail?.project?.totalRate ?? 'N/A'}',
+                                                style: const TextStyle(
+                                                  color: Colors.green,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            'Members',
+                                            style: TextStyle(
+                                              fontFamily: FontFamily.sfPro,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Container(
+                                            height: 15,
+                                            width: 100,
+                                            child: Stack(
+                                              clipBehavior: Clip.none,
+                                              children: (projectDetail?.project?.members ?? []).asMap().entries.map((entry) {
+                                                int index = entry.key;
+                                                var member = entry.value;
+
+                                                List<Color> memberColors = [
+                                                  Colors.purple,
+                                                  Colors.pink,
+                                                  Colors.blue,
+                                                  Colors.yellow,
+                                                ];
+
+                                                String firstInitial = (member.firstName?.isNotEmpty == true) ? member.firstName![0] : 'N';
+
+                                                Color avatarColor = member.profilePic == null ? memberColors[index % memberColors.length] : Colors.transparent;
+
+                                                return Positioned(
+                                                  left: index * (screenWidth / 30),
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      print('Avatar for ${member.firstName} ${member.lastName} tapped!');
+                                                    },
+                                                    child: CircleAvatar(
+                                                      radius: screenWidth / 45,
+                                                      backgroundColor: avatarColor.withOpacity(member.profilePic == null ? 0.5 : 0),
+                                                      backgroundImage: member.profilePic != null ? NetworkImage(member.profilePic!) : null,
+                                                      child: member.profilePic == null
+                                                          ? Text(
+                                                        firstInitial.toUpperCase(),
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      )
+                                                          : null,
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      top: 10, left: 10, right: 10, bottom: 0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        blurRadius: 8.0,
+                                        spreadRadius: 2.0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Task Overview",
+                                        style: TextStyle(
+                                          fontFamily: FontFamily.sfPro,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const Divider(
+                                        thickness: 0.5,
+                                      ),
+                                      LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          // Helper function to get grid configuration based on screen width
+                                          Map<String, dynamic> getGridConfig(
+                                              double width) {
+                                            if (width < 500) {
+                                              return {
+                                                'crossAxisCount': 2,
+                                                'childAspectRatio': 2.2,
+                                                'containerHeightFactor': 0.35,
+                                              };
+                                            } else if (width < 1024) {
+                                              return {
+                                                'crossAxisCount': 2,
+                                                'childAspectRatio': 4.5,
+                                                'containerHeightFactor': 0.25,
+                                              };
+                                            } else {
+                                              return {
+                                                'crossAxisCount': 3,
+                                                'childAspectRatio': 4.5,
+                                                'containerHeightFactor': 0.2,
+                                              };
+                                            }
+                                          }
+
+                                          final gridConfig =
+                                          getGridConfig(constraints.maxWidth);
+
+                                          return GridView.builder(
+                                            shrinkWrap: true,
+                                            physics: NeverScrollableScrollPhysics(),
+                                            gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount:
+                                              gridConfig['crossAxisCount'],
+                                              // Use a responsive crossAxisCount
+                                              childAspectRatio:
+                                              gridConfig['childAspectRatio'],
+                                              // Use a responsive aspect ratio
+                                              crossAxisSpacing: 12,
+                                              mainAxisSpacing: 12,
+                                            ),
+                                            itemCount:
+                                            (projectDetail?.tasks?.standard.length ??
+                                                0) +
+                                                1,
+                                            // Add 1 to itemCount
+                                            itemBuilder: (context, index) {
+                                              if (index ==
+                                                  (projectDetail?.tasks?.standard
+                                                      ?.length ??
+                                                      0)) {
+                                                return Container(
+                                                  height: constraints.maxWidth *
+                                                      gridConfig['containerHeightFactor'],
+                                                  // Responsive container height
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                    border: Border.all(
+                                                        color: Colors.grey,
+                                                        width: 0.2),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color:
+                                                        Colors.grey.withOpacity(0.1),
+                                                        blurRadius: 8.0,
+                                                        spreadRadius: 2.0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(
+                                                        12.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                      MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment.start,
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment.center,
+                                                          children: [
+                                                            const Text(
+                                                              'Others',
+                                                              // Show the task count for others
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                FontWeight.w500,
+                                                                fontFamily: 'SFPro',
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              '${projectDetail?.tasks
+                                                                  ?.others?.count ??
+                                                                  0}',
+                                                              style: const TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                FontWeight.w700,
+                                                                fontFamily: 'SFPro',
+                                                                overflow:
+                                                                TextOverflow.ellipsis,
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                        Stack(
+                                                          alignment: Alignment.center,
+                                                          children: [
+                                                            // Grey background circle (100%)
+                                                            SizedBox(
+                                                              height: 44.0,
+                                                              width: 44.0,
+                                                              child:
+                                                              CircularProgressIndicator(
+                                                                color: AllColors
+                                                                    .greyGoogleForm,
+                                                                value: 1.0,
+                                                                strokeWidth: 8,
+                                                                valueColor:
+                                                                AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                    AllColors
+                                                                        .greyGoogleForm),
+                                                              ),
+                                                            ),
+                                                            // Blue progress circle (over the gray one)
+                                                            SizedBox(
+                                                              height: 44.0,
+                                                              width: 44.0,
+                                                              child:
+                                                              CircularProgressIndicator(
+                                                                value: projectDetail?.tasks?.others?.count != null
+                                                                    ? (projectDetail!.tasks!.others!.count! / 100.0).clamp(0.0, 1.0) // Ensure the value is between 0.0 and 1.0
+                                                                    : 0.0, // Default to 0.0 if count is null
+                                                                strokeWidth: 8,
+                                                                valueColor: AlwaysStoppedAnimation<Color>(AllColors.darkBlue),
+                                                              ),
+                                                            ),
+                                                            // Centered text displaying percentage
+                                                            Text(
+                                                              '${projectDetail?.tasks
+                                                                  ?.others?.count ??
+                                                                  0}%',
+                                                              // Show the percentage
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                FontWeight.bold,
+                                                                fontFamily: 'SFPro',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+
+                                              // Regular task item
+                                              final task =
+                                              projectDetail?.tasks!.standard![index];
+                                              return Container(
+                                                height: constraints.maxWidth *
+                                                    gridConfig['containerHeightFactor'],
+                                                // Responsive container height
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                                  border: Border.all(
+                                                      color: Colors.grey, width: 0.2),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey.withOpacity(
+                                                          0.1),
+                                                      blurRadius: 8.0,
+                                                      spreadRadius: 2.0,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(12.0),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment.start,
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              task?.statusName ??
+                                                                  'No Status',
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                FontWeight.w500,
+                                                                fontFamily: 'SFPro',
+                                                                overflow:
+                                                                TextOverflow.ellipsis,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              task?.tasks ??
+                                                                  'No Task Name',
+                                                              style: const TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                FontWeight.w700,
+                                                                fontFamily: 'SFPro',
+                                                                overflow:
+                                                                TextOverflow.ellipsis,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Stack(
+                                                        alignment: Alignment.center,
+                                                        children: [
+                                                          // Grey background circle (100%)
+                                                          SizedBox(
+                                                            height: 44.0,
+                                                            width: 44.0,
+                                                            child:
+                                                            CircularProgressIndicator(
+                                                              color: AllColors
+                                                                  .greyGoogleForm,
+                                                              value: 1.0,
+                                                              strokeWidth: 8,
+                                                              valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                                  AllColors
+                                                                      .greyGoogleForm),
+                                                            ),
+                                                          ),
+                                                          // Blue progress circle (over the gray one)
+                                                          SizedBox(
+                                                            height: 44.0,
+                                                            width: 44.0,
+                                                            child:
+                                                            CircularProgressIndicator(
+                                                              value: task?.tasks !=
+                                                                  null
+                                                                  ? getProgressValue(
+                                                                  task?.tasks)
+                                                                  : null,
+                                                              strokeWidth: 8,
+                                                              valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                                  AllColors.darkBlue),
+                                                            ),
+                                                          ),
+                                                          // Centered text displaying percentage
+                                                          Text(
+                                                            '${task?.tasks != null ? '${task!.tasks!}%' : 'No Task Name'}',
+                                                            style: const TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontFamily: 'SFPro',
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        blurRadius: 8.0,
+                                        spreadRadius: 2.0,
+                                      ),
+                                    ],
+                                  ),
+                                  child:
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Project Reminder Setting',
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      const Text(
+                                        'Add Time',
+                                        style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 10),
+
+                                      // Use a Container to hold the ListView
+                                      Container(
+                                        height: (controller.addedRows.length * 65).toDouble(), // Assuming each item takes about 60 pixels in height
+                                        child: Obx(
+                                              () => ListView.builder(
+                                            itemCount: controller.addedRows.length,
+                                            itemBuilder: (context, index) {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 15,),
+                                                child:
+                                                Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        SizedBox(
+                                                          width: 40,
+
+                                                          child: index == 0
+                                                              ? IconButton(
+                                                            icon: controller.canAddMore
+                                                                ? const Icon(Icons.add, color: Colors.green)
+                                                                : Icon(Icons.add_box_outlined, color: Colors.grey.shade300),
+                                                            onPressed: controller.canAddMore
+                                                                ? () {
+                                                              controller.addNewRow(); // Add new row
+                                                            }
+                                                                : null,
+                                                          )
+                                                              : IconButton(
+                                                            icon: const Icon(Icons.close, color: Colors.red),
+                                                            onPressed: () => controller.removeRow(index),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Expanded(
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              showDialog(
+                                                                context: context,
+                                                                builder: (BuildContext context) {
+                                                                  return AlertDialog(
+                                                                    title: const Text("Select Month"),
+                                                                    content: SingleChildScrollView(
+                                                                      child: ListBody(
+                                                                        children: controller.months.map((month) {
+                                                                          return GestureDetector(
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                                                              child: Text(month),
+                                                                            ),
+                                                                            onTap: () {
+                                                                              controller.updateMonth(index, month);
+                                                                              Navigator.of(context).pop();
+                                                                            },
+                                                                          );
+                                                                        }).toList(),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.white,
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(color: Colors.grey),
+                                                              ),
+                                                              child: Text(
+                                                                controller.addedRows[index]['month'] ?? 'Select Month',
+                                                                style: const TextStyle(color: Colors.grey),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Expanded(
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              showDialog(
+                                                                context: context,
+                                                                builder: (BuildContext context) {
+                                                                  return AlertDialog(
+                                                                    title: const Text("Select Day"),
+                                                                    content: SingleChildScrollView(
+                                                                      child: ListBody(
+                                                                        children: List.generate(31, (i) {
+                                                                          return GestureDetector(
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                                                              child: Text((i + 1).toString()),
+                                                                            ),
+                                                                            onTap: () {
+                                                                              controller.updateDay(index, (i + 1).toString());
+                                                                              Navigator.of(context).pop();
+                                                                            },
+                                                                          );
+                                                                        }),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.white,
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(color: Colors.grey),
+                                                              ),
+                                                              child: Text(
+                                                                controller.addedRows[index]['day'] ?? 'Select Day',
+                                                                style: const TextStyle(color: Colors.grey),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+
+
+                                                      ],
+                                                    ),
+
+                                                  ],
+                                                ),
+
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+
+                                      Obx(() {
+                                        if (_assignedLeadToController.loading.value) {
+                                          return const CircularProgressIndicator();
+                                        } else {
+                                          return CreateNewLeadScreenCard(
+                                            hintText: _assignedLeadToController
+                                                .selectedLeadName.value.isEmpty
+                                                ? Strings.select
+                                                : _assignedLeadToController
+                                                .selectedLeadName.value,
+                                            categories:
+                                            _assignedLeadToController.fullCategoriesRxList,
+                                            onCategoryChanged: (selectedCategory) {
+                                              // Handle selection for full names with emails
+                                              final names =
+                                              selectedCategory.split('\n')[0].split(' ');
+                                              if (names.length >= 2) {
+                                                final firstName = names[0];
+                                                final lastName = names[1];
+                                                _assignedLeadToController.selectedLeadName
+                                                    .value = '$firstName $lastName';
+                                              }
+                                            },
+                                            isMultiSelect: true,
+                                            isForDivisions: true,
+                                          );
+                                        }
+                                      }),
+                                      const SizedBox(height: 15),
+                                      CustomButton2(
+                                        height: 25,
+                                        width: 90,
+                                        borderRadius: 30,
+                                        child: Text(
+                                          'Save Setting',
+                                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                        ),
+                                        color: Colors.green,
+                                        onTap: () {},
+                                      ),
+                                    SizedBox(height: 60),
+
+                                    ],
+                                  ),
+                                ),
+
+                        ]
+                            )
+                          )
+                        );
+                      case 'Task':
+                        return const Center(
+                          child: Text("Task Content:"),
+                        );
+                      case 'SequentialTask':
+                        return const Center(
+                          child: Text("Sequential Task Content"),
+                        );
+                      default:
+                        return Container();
+                    }
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  double getProgressValue(String? task) {
+    if (task == null || task.isEmpty) {
+      return 0.0; // Default to 0.0 if task is null or empty
+    }
+
+    // Convert the string to a double and divide by 100 if it represents a percentage.
+    double? progress = double.tryParse(task);
+    if (progress != null) {
+      return progress / 100;
+    }
+
+    return 0.0; // Default to 0.0 if parsing fails
+  }
+
+
+}
