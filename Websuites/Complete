@@ -1,84 +1,105 @@
-👍👍Lead Screen👍👍
-- Lead List is displayed.
+👍👍Lead Screen👍👍 🖥 
+- Lead List is displayed.  ✅ 
 
 **Trash Screen:**
-- Trash List is displayed.
+- Trash List is displayed.  ✅ 
 
 **Settings Screen:**
-- List is displayed.
+- List is displayed.  ✅ 
 
 **Lead Master:**
 - Types
 - Sources: Full list displayed.
-- Dead Reason: New functionality will be added to the app CRM.
+- Dead Reason: New functionality will be added to the app CRM.  ✅ 
 
-👍👍Customer Screen👍👍
+👍👍Customer Screen👍👍 🖥 
 
 1. **List:**
-   - Customer List is displayed.
+   - Customer List is displayed. ✅ 
    
 2. **Activities:**
-   - All Activities: List is displayed.
-   - Daily Sales Report: List is displayed.
-   - No Activities: List is displayed.
-   - Customer Report: List is displayed.
-   - Status Report: List is displayed.
-   - Service Status: Incomplete (New screen being developed).
+   - All Activities: List is displayed. ✅ 
+   - Daily Sales Report: List is displayed. ✅ 
+   - No Activities: List is displayed. ✅ 
+   - Customer Report: List is displayed. ✅ 
+   - Status Report: List is displayed. ✅ 
+   - Service Status: Incomplete (New screen being developed).  ✅ 
 
 **Payment Reminder:**
-- All information is complete and the list is displayed. The only thing pending is the working of the payment details view.
+- All information is complete and the list is displayed. The only thing pending is the working of the payment details view.  ✅ 
 
 **Companies:**
-- All information is complete and the list is displayed. The remaining tasks are viewing company details and opening the company website.
+- All information is complete and the list is displayed. The remaining tasks are viewing company details and opening the company website. ✅ 
 
 **Services:**
-- List is displayed properly.
+- List is displayed properly. ✅ 
 
-**Order Product:**
-- List is displayed with different images according to the division.
+**Order Product:** ✅ 
+- List is displayed with different images according to the division. ✅ 
 
 **Orderless Services:**
-- The list was showing previously, but is currently not showing due to a backend issue.
+- The list was showing previously, but is currently not showing due to a backend issue. ✅ 
 
 **Trash:**
-- List is displayed.
+- List is displayed. ✅ 
 
 **Activation:**
-- Activation List is displayed.
+- Activation List is displayed. ✅ 
 
 **Customer Master:**
-- List is displayed on all screens.
+- List is displayed on all screens. ✅ 
 
 **Setting Screen:**
-- List is displayed in columns, but the "checkbox clicked," "update," and "save changes" are not working because the API is not implemented yet.
+- List is displayed in columns, but the "checkbox clicked," "update," and "save changes" are not working because the API is not implemented yet. ✅ 
 
-👍👍Order Screen👍👍
+👍👍Order Screen👍👍  🖥 
 1. **List:**
-   - Order List is displayed.
+   - Order List is displayed. ✅ 
 
 2. **Activities:**
-   - Activities List is displayed.
+   - Activities List is displayed. ✅ 
 
 3. **Performa:**
-   - List was showing before, but is currently not displaying.
+   - List was showing before, but is currently not displaying. ✅ 
 
 4. **Payment:**
-   - Payment List is displayed properly.
+   - Payment List is displayed properly.  ✅ 
 
-👍👍Reports👍👍
+👍👍Reports👍👍 🖥 
 
 1. **Task Report:**
-   - Ongoing Task List shows proper timing and hours. You can click on the project name to open a new screen.
-   - Today's Task Report: List shows total tasks, effective hours, and total hours.
+   - Ongoing Task List shows proper timing and hours. You can click on the project name to open a new screen. ✅ 
+   - Today's Task Report: List shows total tasks, effective hours, and total hours.  ✅ 
 
 2. **Sales:**
-   - List is displayed properly.
+   - List is displayed properly. ✅ 
 
-👍👍Roles👍👍
-- 100% complete.
+👍👍Roles👍👍 🖥 
+- 100% complete. ✅ 
 
-👍👍Master👍👍
-- **Departments:** List is displayed.
-- **Divisions:** List is displayed.
-- **Proposals:** List is displayed.
-- **Customized Labels:** List is displayed.
+ 👍👍ROLES👍👍
+
+ **100% Complete**
+
+
+ 👍👍Project👍👍 🖥 
+
+    Project List:- List showing you can update and edit list also you can create   ✅ 
+      
+         Details view: - Details list are showing  ✅ 
+                         Activation Sent done      ✅ 
+                         Project Report List, showing you can create update  ✅ 
+
+             Task : -  Task list showing you can update and create ✅ 
+             Sub SequentialTask : - you can update,create  and  list are showing  ✅ 
+                         
+ 
+       Master:- Done  ✅ 
+
+
+
+👍👍Master👍👍    🖥 
+- **Departments:** List is displayed. ✅ 
+- **Divisions:** List is displayed. ✅ 
+- **Proposals:** List is displayed. ✅ 
+- **Customized Labels:** List is displayed. ✅ 
