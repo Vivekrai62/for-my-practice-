@@ -1,3 +1,9 @@
+
+👍👍Dashboard👍👍  🔵 
+       Not started
+
+
+
 👍👍LEAD SCREEN👍👍  🖥 
 
 - **Lead List:**
@@ -102,7 +108,10 @@
 👍👍SALES👍👍  🖥 
 
 - **Sales Screen:**
-  - After clicking on December, the API and UI are not implemented.
+  - After clicking on December(details view screen open), list showing edit update now working issue by backend side. (95% complete)
+
+ 👍👍Task👍👍  🖥 
+   done
 
 
 
@@ -115,13 +124,29 @@
     Project List:- 
       Details view:-
          Credentials:-  Pending by backend side response not coming
+         master : -    accept boolean value but pass boolean not work error 
    
  
+ 👍👍Products👍👍  🖥 
+            currently  working 
+
+
+ 👍👍User 👍👍  🖥 
+         Not started 
+
+ 👍👍Inventory👍👍  🖥 
+         Not started 
+
+
+ 👍👍Help desk👍👍  🖥 
+                   Not started 
 
 
 
 
  👍👍MASTER👍👍 🖥 
+
+      🔵  Dashboard : - Not started
 
 - All lists are available, but no Patch, Delete, Update, or Create APIs are implemented.
 
