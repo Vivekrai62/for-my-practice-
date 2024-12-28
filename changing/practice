@@ -1,1 +1,272 @@
-ok
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
+import '../../../../../Utils/utils.dart';
+import '../../../utils/button/CustomButton.dart';
+import '../../../viewModels/reports/task_report/project_overview/create_project_report_list/task_create_report_list_view_model.dart';
+
+class ProjectDetailsScreen extends StatelessWidget {
+  final String projectId;
+  final TaskCreateReportListViewModel viewModel = Get.put(TaskCreateReportListViewModel()); // Register the ViewModel
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _startDateController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
+  String title = '';
+  String description = '';
+  DateTime? startDate;
+  DateTime? endDate;
+  List<String> ccTo = [];
+  Map<String, dynamic>? attachment; // To hold the attachment data
+
+  ProjectDetailsScreen({Key? key, required this.projectId}) : super(key: key);
+
+  void _showDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Card(
+                color: Colors.white,
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.8,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Center(
+                            child: Text(
+                              'Add Report',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text('Title',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Title',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              title = value; // Store title value
+                            },
+                          ),
+                          SizedBox(height: 6),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Start Date *',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold)),
+                                    TextField(
+                                      controller: _startDateController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Select start date',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      readOnly: true,
+                                      onTap: () async {
+                                        DateTime? pickedDate = await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2101),
+                                        );
+                                        if (pickedDate != null) {
+                                          startDate = pickedDate;
+                                          _startDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('End Date *',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold)),
+                                    TextField(
+                                      controller: _endDateController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Select end date',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      readOnly: true,
+                                      onTap: () async {
+                                        DateTime? pickedDate = await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2101),
+                                        );
+                                        if (pickedDate != null) {
+                                          endDate = pickedDate;
+                                          _endDateController.text = DateFormat(' yyyy-MM-dd').format(pickedDate);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 6),
+                          Text('Description',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter Description',
+                              border: OutlineInputBorder(),
+                            ),
+                            maxLines: 5,
+                            onChanged: (value) {
+                              description = value; // Store description value
+                            },
+                          ),
+                          SizedBox(height: 6),
+                          Text('CC:',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Multiple email IDs',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              ccTo = value.split(',').map((e) => e.trim()).toList(); // Store CC values
+                            },
+                          ),
+                          SizedBox(height: 6),
+                          Text('Attachments',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              CustomButton(
+                                height: 40,
+                                width: 100,
+                                backgroundColor: Colors.grey,
+                                child: Text('Choose files',
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 12)),
+                                onPressed: () async {
+                                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                                  if (result != null) {
+                                    attachment = {
+                                      'file': result.files.single.path,
+                                      'name': result.files.single.name,
+                                    };
+                                  } else {
+                                    Utils.snackbarFailed('No file chosen');
+                                  }
+                                },
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Text(
+                                    attachment != null ? attachment!['name'] : 'No file chosen',
+                                    style: TextStyle(fontSize: 12, color: Colors.black),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 25.0),
+                          Center(
+                            child: CustomButton(
+                              height: 40,
+                              width: 100,
+                              borderRadius: 8.0,
+                              backgroundColor: Colors.blue,
+                              onPressed: () {
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  if (startDate == null || endDate == null) {
+                                    Utils.snackbarFailed('Start date and end date are required');
+                                    return;
+                                  }
+                                  viewModel.taskCreateReportList(
+                                    context,
+                                    title,
+                                    description,
+                                    startDate,
+                                    endDate,
+                                    projectId,
+                                    ccTo,
+                                    attachment, // Pass the attachment variable here
+                                  );
+                                  Navigator.of(context).pop(); // Close the dialog
+                                }
+                              },
+                              child: Text('Submit',
+                                  style: TextStyle(color: Colors.white, fontSize: 12)),
+                            ),
+                          ),
+                          SizedBox(height: 10.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Project Details'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _showDialog(context),
+          child: Text('Add Report'),
+        ),
+      ),
+    );
+  }
+}
