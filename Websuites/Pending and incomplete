@@ -1,6 +1,6 @@
 
 👍👍Dashboard👍👍  🔵 
-       Not started
+       98 % done
 
 
 
@@ -133,10 +133,10 @@
 
 
  👍👍User 👍👍  🖥 
-         Not started 
+       done
 
  👍👍Inventory👍👍  🖥 
-         Not started 
+       85 % done data not uploading in request model when will create 
 
 
  👍👍Help desk👍👍  🖥 
@@ -147,19 +147,19 @@
 
  👍👍MASTER Setting 👍👍 🖥 
 
-      🔵  Dashboard : - Not started
+      🔵  Dashboard : -Done
 
 - All lists are available, but no Patch, Delete, Update, or Create APIs are implemented.
 
 - **Departments:**
-  - API not implemented for adding departments and updating/editing.
+  - done
 
 - **Divisions:**
-  - API not implemented for adding divisions and updating/editing.
+  - done
 
 - **Proposal:**
-  - API not implemented for adding lead proposals and updating/editing.
+  - done
 
 - **Customize Label:**
-  - API not implemented for editing (icon) updates
+  - done
 
