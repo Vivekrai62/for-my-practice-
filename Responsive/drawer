@@ -1,0 +1,300 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'AllColors.dart';
+
+class DrawerController extends GetxController {
+  final RxString selectedNav = 'Dashboard'.obs;
+  final RxString selectedSubNav = ''.obs;
+  final RxBool isAccountsExpanded = false.obs;
+  final RxBool isLeadsExpanded = false.obs;
+  RxString currentlyExpandedNav = ''.obs;
+  final RxBool isCollapsed = false.obs;
+
+  void toggleDrawer() {
+    isCollapsed.value = !isCollapsed.value;
+
+  }
+
+  void handleNavItemClick(String title, VoidCallback? onExpand) {
+    if (currentlyExpandedNav.value != title) {
+      if (currentlyExpandedNav.value == 'Accounts') {
+        isAccountsExpanded.value = false;
+      } else if (currentlyExpandedNav.value == 'Leads') {
+        isLeadsExpanded.value = false;
+      }
+      currentlyExpandedNav.value = title;
+    }
+
+    selectedNav.value = title;
+
+    if (selectedNav.value != 'Accounts' && selectedNav.value != 'Leads') {
+      selectedSubNav.value = '';
+    }
+    if (onExpand != null) {
+      onExpand();
+    }
+  }
+
+  void toggleSubNav(String title) {
+    selectedSubNav.value = title;
+  }
+
+  void expandAccounts() {
+    isAccountsExpanded.toggle();
+  }
+
+  void expandLeads() {
+    isLeadsExpanded.toggle();
+  }
+}
+
+class CustomDrawer extends StatelessWidget {
+  final Function(String, String) onNavigation;
+
+  CustomDrawer({
+    Key? key,
+    required this.onNavigation,
+  }) : super(key: key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      onNavigation('Dashboard', '');
+    });
+  }
+
+  final DrawerController controller = Get.put(DrawerController());
+
+  Widget _buildNavItem({
+    required String title,
+    required IconData icon,
+    bool hasSubmenu = false,
+    VoidCallback? onExpand,
+    bool isExpanded = false,
+  }) {
+    return Obx(() {
+      final bool isSelected = controller.selectedNav.value == title;
+
+      return GestureDetector(
+        onTap: () {
+          if (hasSubmenu) {
+            if (controller.isCollapsed.value) {
+              controller.toggleDrawer();
+              controller.handleNavItemClick(title, onExpand);
+            } else {
+              controller.handleNavItemClick(title, onExpand);
+            }
+          } else {
+            controller.handleNavItemClick(title, null);
+            onNavigation(controller.selectedNav.value, controller.selectedSubNav.value);
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected ? AllColors.practiceColor : null,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          height: 37,
+          width: controller.isCollapsed.value ? 44 : 190,
+          padding: EdgeInsets.symmetric(horizontal: controller.isCollapsed.value ? 8 : 16),
+          child: Row(
+            mainAxisAlignment: controller.isCollapsed.value
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.grey[600],
+                size: 20,
+              ),
+              if (!controller.isCollapsed.value) ...[
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey[800],
+                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                if (hasSubmenu)
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: isSelected ? Colors.white : Colors.grey[600],
+                    size: 20,
+                  ),
+              ],
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildSubNavItem(String title) {
+    return Obx(() {
+      final bool isSelected = controller.selectedSubNav.value == title;
+
+      return !controller.isCollapsed.value
+          ? GestureDetector(
+        onTap: () {
+          controller.toggleSubNav(title);
+          onNavigation(controller.selectedNav.value, title);
+        },
+        child: Padding(
+          // padding: const EdgeInsets.only(top: 6, left: 40, right: 35),   left: controller.isCollapsed.value ? 0 : 15
+            padding: EdgeInsets.only(top: 6,  left: controller.isCollapsed.value ? 120 : 40, right: 35),
+        child: Container(
+            decoration: BoxDecoration(
+              color: isSelected ? AllColors.textField2 : null,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            height: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      )
+          : const SizedBox.shrink();
+    });
+  }
+
+  Widget _buildCollapseButton() {
+    return Obx(() {
+      return GestureDetector(
+        onTap: controller.toggleDrawer,
+        child: Container(
+
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AllColors.practiceColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            controller.isCollapsed.value
+                ? Icons.arrow_forward_ios_sharp
+                : Icons.arrow_back_ios_sharp,
+            color: Colors.white,
+            size: 16,
+          ),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      return Container(
+        width: controller.isCollapsed.value ? 0 : 250,
+        color: Colors.yellow,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: 24,
+                    left: controller.isCollapsed.value ? 8 : 15,
+                    right: controller.isCollapsed.value ? 8 : 15,
+                    bottom: 15,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: controller.isCollapsed.value
+                        ? CrossAxisAlignment.center
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: controller.isCollapsed.value ? 0 : 15,
+                          bottom: 20,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: controller.isCollapsed.value
+                              ? MainAxisAlignment.center
+                              : MainAxisAlignment.start,
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/WHLogo.png",
+                                height: 30,
+                                width: 30,
+                              ),
+                            ),
+                            if (!controller.isCollapsed.value) ...[
+                              const SizedBox(width: 5),
+                              const Text(
+                                "WebSuites",
+                                style: TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      _buildNavItem(
+                        title: 'Dashboard',
+                        icon: Icons.dashboard_outlined,
+                      ),
+                      const SizedBox(height: 5),
+                      _buildNavItem(
+                        title: 'Accounts',
+                        icon: Icons.person_outline,
+                        hasSubmenu: true,
+                        onExpand: controller.expandAccounts,
+                        isExpanded: controller.isAccountsExpanded.value,
+                      ),
+                      if (controller.isAccountsExpanded.value) ...[
+                        _buildSubNavItem('Create'),
+                        _buildSubNavItem('List'),
+                      ],
+                      const SizedBox(height: 5),
+                      _buildNavItem(
+                        title: 'Contacts',
+                        icon: Icons.contacts_outlined,
+                      ),
+                      const SizedBox(height: 5),
+                      _buildNavItem(
+                        title: 'Leads',
+                        icon: Icons.verified_user_outlined,
+                        hasSubmenu: true,
+                        onExpand: controller.expandLeads,
+                        isExpanded: controller.isLeadsExpanded.value,
+                      ),
+                      if (controller.isLeadsExpanded.value) ...[
+                        _buildSubNavItem('Create'),
+                        _buildSubNavItem('List'),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: controller.isCollapsed.value ? 0 : 8,
+                right: controller.isCollapsed.value ? 0 : 8,
+                bottom: 15,
+              ),
+              child: _buildCollapseButton(),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
