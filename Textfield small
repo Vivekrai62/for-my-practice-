@@ -1,0 +1,26 @@
+      SizedBox(
+                  width: 200, // Set the desired width
+                  height: 40, // Set the desired height
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search Users',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      suffixIcon: userProvider.searchQuery.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          userProvider.setSearchQuery('');
+                        },
+                      )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      userProvider.setSearchQuery(value);
+                    },
+                  ),
+                ),
