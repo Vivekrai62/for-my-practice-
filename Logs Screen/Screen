@@ -1,0 +1,686 @@
+import 'package:flutter/material.dart';
+
+class ActivityLog {
+  final String id;
+  final String type;
+  final String time;
+  final String user;
+  final String description;
+  final String location;
+  final Map<String, dynamic> details;
+  final Color color;
+  final Color bgColor;
+  final Color borderColor;
+  final Color textColor;
+  final IconData icon;
+
+  ActivityLog({
+    required this.id,
+    required this.type,
+    required this.time,
+    required this.user,
+    required this.description,
+    required this.location,
+    required this.details,
+    required this.color,
+    required this.bgColor,
+    required this.borderColor,
+    required this.textColor,
+    required this.icon,
+  });
+}
+
+class ActivityLogsScreen extends StatefulWidget {
+  @override
+  _ActivityLogsScreenState createState() => _ActivityLogsScreenState();
+}
+
+class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
+  String _searchTerm = '';
+  String _filterType = 'all';
+  String? _expandedCard;
+  TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<ActivityLog> get _activityLogs => [
+    ActivityLog(
+      id: '#01',
+      type: 'login',
+      time: '14 May 2025, 10:16 AM',
+      user: 'Admin',
+      description: 'User Admin logged in successfully',
+      location: 'Mumbai, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Active',
+        'device': 'Chrome Browser',
+        'ip': '192.168.1.100'
+      },
+      color: Colors.green.shade500,
+      bgColor: Colors.green.shade50,
+      borderColor: Colors.green.shade200,
+      textColor: Colors.green.shade700,
+      icon: Icons.login,
+    ),
+    ActivityLog(
+      id: '#02',
+      type: 'login',
+      time: '14 May 2025, 10:03 AM',
+      user: 'Admin',
+      description: 'User Admin logged in successfully',
+      location: 'Mumbai, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Active',
+        'device': 'Chrome Browser',
+        'ip': '192.168.1.100'
+      },
+      color: Colors.green.shade500,
+      bgColor: Colors.green.shade50,
+      borderColor: Colors.green.shade200,
+      textColor: Colors.green.shade700,
+      icon: Icons.login,
+    ),
+    ActivityLog(
+      id: '#03',
+      type: 'logout',
+      time: '13 May 2025, 5:56 PM',
+      user: 'Admin',
+      description: 'User Admin logged out successfully',
+      location: 'Mumbai, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Inactive',
+        'device': 'Chrome Browser',
+        'sessionDuration': '2h 45min'
+      },
+      color: Colors.orange.shade500,
+      bgColor: Colors.orange.shade50,
+      borderColor: Colors.orange.shade200,
+      textColor: Colors.orange.shade700,
+      icon: Icons.logout,
+    ),
+    ActivityLog(
+      id: '#04',
+      type: 'login',
+      time: '13 May 2025, 5:35 PM',
+      user: 'Admin',
+      description: 'User Admin logged in successfully',
+      location: 'Mumbai, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Active',
+        'device': 'Chrome Browser',
+        'ip': '192.168.1.100'
+      },
+      color: Colors.green.shade500,
+      bgColor: Colors.green.shade50,
+      borderColor: Colors.green.shade200,
+      textColor: Colors.green.shade700,
+      icon: Icons.login,
+    ),
+    ActivityLog(
+      id: '#05',
+      type: 'logout',
+      time: '13 May 2025, 5:34 PM',
+      user: 'Admin',
+      description: 'User Admin logged out successfully',
+      location: 'Mumbai, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Inactive',
+        'device': 'Chrome Browser',
+        'sessionDuration': '30min'
+      },
+      color: Colors.orange.shade500,
+      bgColor: Colors.orange.shade50,
+      borderColor: Colors.orange.shade200,
+      textColor: Colors.orange.shade700,
+      icon: Icons.logout,
+    ),
+    ActivityLog(
+      id: '#06',
+      type: 'call',
+      time: '13 May 2025, 4:58 PM',
+      user: 'Admin',
+      description: 'Call answered - Customer interested',
+      location: 'Delhi, India',
+      details: {
+        'name': 'Admin',
+        'email': 'admin@test.com',
+        'mobile': '8576543210',
+        'status': 'Answered',
+        'remark': 'Customer interested in property',
+        'categories': 'Real Estate CRM',
+        'duration': '15min 30sec',
+        'callType': 'Incoming'
+      },
+      color: Colors.blue.shade500,
+      bgColor: Colors.blue.shade50,
+      borderColor: Colors.blue.shade200,
+      textColor: Colors.blue.shade700,
+      icon: Icons.phone,
+    ),
+  ];
+
+  List<ActivityLog> get _filteredLogs {
+    return _activityLogs.where((log) {
+      final matchesSearch = log.description.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+          log.user.toLowerCase().contains(_searchTerm.toLowerCase());
+      final matchesFilter = _filterType == 'all' || log.type == _filterType;
+      return matchesSearch && matchesFilter;
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Activity Logs',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade900,
+              ),
+            ),
+            Text(
+              'Monitor system activities and user actions',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Stack(
+              children: [
+                Icon(
+                  Icons.notifications_outlined,
+                  size: 24,
+                  color: Colors.grey.shade600,
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade500,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Search and Filter Section
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Search bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search activities...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      if (mounted) {
+                        setState(() {
+                          _searchTerm = value;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(height: 12),
+
+                // Filter buttons
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterButton('all', 'All Activities', Icons.timeline),
+                      SizedBox(width: 8),
+                      _buildFilterButton('login', 'Login', Icons.login),
+                      SizedBox(width: 8),
+                      _buildFilterButton('logout', 'Logout', Icons.logout),
+                      SizedBox(width: 8),
+                      _buildFilterButton('call', 'Calls', Icons.phone),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Activity list
+          Expanded(
+            child: _filteredLogs.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'No activities found',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Try adjusting your search or filter',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: _filteredLogs.length,
+              itemBuilder: (context, index) {
+                return _buildActivityCard(_filteredLogs[index]);
+              },
+            ),
+          ),
+
+          // Load more button
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Handle load more
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Loading more activities...')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade500,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Load More Activities',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String key, String label, IconData icon) {
+    final isSelected = _filterType == key;
+    return GestureDetector(
+      onTap: () {
+        if (mounted) {
+          setState(() {
+            _filterType = key;
+          });
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade500 : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? null : Border.all(color: Colors.grey.shade200),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ] : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : Colors.grey.shade600,
+            ),
+            SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityCard(ActivityLog log) {
+    final isExpanded = _expandedCard == log.id;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Main card content
+          InkWell(
+            onTap: () {
+              if (mounted) {
+                setState(() {
+                  _expandedCard = isExpanded ? null : log.id;
+                });
+              }
+            },
+            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Header row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: log.color,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                log.icon,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Wrap(
+                                    children: [
+                                      Text(
+                                        log.id,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade900,
+                                        ),
+                                      ),
+                                      Text(
+                                        ' • ',
+                                        style: TextStyle(color: Colors.grey.shade400),
+                                      ),
+                                      Text(
+                                        'User :: ${log.user}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.blue.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    log.description,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Transform.rotate(
+                        angle: isExpanded ? 1.57 : 0,
+                        child: Icon(
+                          Icons.chevron_right,
+                          color: Colors.grey.shade400,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+
+                  // Time and location
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                      SizedBox(width: 4),
+                      Text(
+                        log.time,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
+                      SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          log.location,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expanded details
+          if (isExpanded)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                border: Border(top: BorderSide(color: Colors.grey.shade100)),
+              ),
+              padding: EdgeInsets.all(16),
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Details grid
+                  Column(
+                    children: [
+                      _buildDetailRow(Icons.person_outline, 'Name: ${log.details['name']}'),
+                      _buildDetailRow(Icons.email_outlined, 'Email: ${log.details['email']}'),
+                      _buildDetailRow(Icons.phone_android, 'Mobile: ${log.details['mobile']}'),
+                      if (log.details['device'] != null)
+                        _buildDetailRow(Icons.computer, 'Device: ${log.details['device']}'),
+                      if (log.details['duration'] != null)
+                        _buildDetailRow(Icons.schedule, 'Duration: ${log.details['duration']}'),
+                      if (log.details['sessionDuration'] != null)
+                        _buildDetailRow(Icons.schedule, 'Session: ${log.details['sessionDuration']}'),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+
+                  // Status and remark row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: log.bgColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: log.borderColor),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: log.color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              log.details['status'] ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: log.textColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (log.details['remark'] != null)
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: Text(
+                              log.details['remark'],
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  if (log.details['categories'] != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Category: ${log.details['categories']}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: Colors.grey.shade400),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
